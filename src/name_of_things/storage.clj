@@ -1,10 +1,10 @@
 (ns name-of-things.storage)
 
-(def mem (atom {}))
+(def storage-root "/tmp/name-of-things")
 
 (defn get [k]
-  (@mem k))
+  (slurp (str storage-root "/" k)))
 
 (defn set [k v]
-  (swap! mem assoc k v))
+  (spit (str storage-root "/" k) v))
 
