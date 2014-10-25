@@ -1,18 +1,22 @@
 (ns name-of-things.core
   (:use ring.middleware.params)
-  (:require [ring.util.response :as res]
-            [ring.util.request  :as req]))
-
-(def mem (atom {}))
+  (:require [clojure.tools.logging :as log]
+            [ring.util.response :as res]
+            [ring.util.request  :as req]
+            [name-of-things.storage :as storage]
+            ))
 
 (defn app [request]
-  (let [kv-k (req/path-info request)
-        kv-v (req/body-string request)]
-    (println (str kv-k " - " kv-v))
+  (let [k (req/path-info request)
+        v (req/body-string request)]
     (case (:request-method request)
       :post
       (do
-       (swap! mem assoc kv-k kv-v)
-       (res/response ""))
+        (log/info "STORE REQUEST")
+        (storage/set k v)
+        (res/response ""))
       :get
-      (res/response (@mem kv-k)))))
+      (do
+        (log/info "GET REQUEST")
+        (res/response (storage/get k))))
+    ))
